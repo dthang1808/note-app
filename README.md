@@ -26,7 +26,7 @@ Nếu server báo `querySrv ECONNREFUSED` khi khởi động, Node.js có thể 
 ## Tài khoản
 
 - Người dùng có thể đăng ký và đăng nhập bằng username/mật khẩu.
-- Username dài 3–32 ký tự; mật khẩu dài 12–72 byte.
+- Username dài 3–32 ký tự; mật khẩu dài 12–72 ký tự.
 - Mật khẩu được băm bằng bcrypt; phiên đăng nhập dùng cookie `HttpOnly` hết hạn sau 7 ngày.
 - Ghi chú được giới hạn theo tài khoản; người dùng không thể đọc hoặc sửa ghi chú của người khác.
 - Khi deploy, đặt `JWT_SECRET`, `CLIENT_URL` và thông tin MongoDB trong phần environment variables của hosting. Không đưa `server/.env` lên GitHub.
@@ -45,4 +45,3 @@ Nếu server báo `querySrv ECONNREFUSED` khi khởi động, Node.js có thể 
 
 - Tạo, chỉnh sửa, ghim, xóa và tìm kiếm ghi chú.
 - Lưu dữ liệu trong MongoDB.
-- Tự động nhập ghi chú từ `server/data/notes.json` khi database chưa có ghi chú; tệp JSON được giữ nguyên làm bản dự phòng.

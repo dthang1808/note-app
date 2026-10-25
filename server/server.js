@@ -70,67 +70,11 @@ async function bootstrapInitialUser() {
   });
 }
 
-async function migrateLegacyNotes(initialUser) {
-  const unassignedNotesExist = await Note.exists({ ownerId: { $exists: false } });
-  if (unassignedNotesExist && !initialUser) {
-    console.warn('Existing notes without an account owner are hidden. Set INITIAL_USER_USERNAME and INITIAL_USER_PASSWORD to assign them to an account.');
-  }
 
-  if (initialUser) {
-    const { modifiedCount } = await Note.updateMany(
-      { ownerId: { $exists: false } },
-      { $set: { ownerId: initialUser._id } },
-    );
-    if (modifiedCount > 0) {
-      console.log(`Assigned ${modifiedCount} existing note(s) to "${initialUser.username}".`);
-    }
-  }
-
-  let legacyNotes;
-
-  try {
-    legacyNotes = JSON.parse(
-      await readFile(new URL('./data/notes.json', import.meta.url), 'utf8'),
-    );
-  } catch (error) {
-    if (error.code === 'ENOENT') return;
-    throw error;
-  }
-
-  if (!Array.isArray(legacyNotes)) {
-    throw new Error('Legacy notes file must contain a JSON array.');
-  }
-
-  if (legacyNotes.length === 0) return;
-  if (!initialUser) {
-    console.warn('Legacy JSON notes were not imported. Set INITIAL_USER_USERNAME and INITIAL_USER_PASSWORD to assign them to an account.');
-    return;
-  }
-
-  if (await Note.exists()) {
-    console.warn(
-      `Found ${legacyNotes.length} legacy note(s), but MongoDB already contains notes. Skipping automatic import to avoid duplicates.`,
-    );
-    return;
-  }
-
-  await Note.insertMany(
-    legacyNotes.map((note) => ({
-      ownerId: initialUser._id,
-      title: note.title,
-      content: note.content,
-      pinned: note.pinned,
-      createdAt: new Date(note.createdAt),
-      updatedAt: new Date(note.updatedAt),
-    })),
-  );
-  console.log(`Imported ${legacyNotes.length} legacy note(s) to MongoDB.`);
-}
 
 async function startServer() {
   await connectDB();
   const initialUser = await bootstrapInitialUser();
-  await migrateLegacyNotes(initialUser);
   app.listen(port, () => {
     console.log(`Notes API đang chạy tại http://localhost:${port}`);
   });
