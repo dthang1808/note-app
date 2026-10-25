@@ -39,7 +39,9 @@ function validateNote(body) {
 
 export async function getNotes(req, res, next) {
   try {
-    const notes = await Note.find().sort({ pinned: -1, updatedAt: -1 }).lean();
+    const notes = await Note.find({ ownerId: req.user.id })
+      .sort({ pinned: -1, updatedAt: -1 })
+      .lean();
     res.json(notes.map(serializeNote));
   } catch (error) {
     next(error);
@@ -51,7 +53,7 @@ export async function createNote(req, res, next) {
     const result = validateNote(req.body ?? {});
     if (result.error) return res.status(400).json({ error: result.error });
 
-    const note = await Note.create(result.value);
+    const note = await Note.create({ ...result.value, ownerId: req.user.id });
     res.status(201).json(serializeNote(note));
   } catch (error) {
     next(error);
@@ -67,10 +69,11 @@ export async function updateNote(req, res, next) {
       return res.status(404).json({ error: 'Không tìm thấy ghi chú.' });
     }
 
-    const note = await Note.findByIdAndUpdate(req.params.id, result.value, {
-      new: true,
-      runValidators: true,
-    }).lean();
+    const note = await Note.findOneAndUpdate(
+      { _id: req.params.id, ownerId: req.user.id },
+      result.value,
+      { new: true, runValidators: true },
+    ).lean();
     if (!note) return res.status(404).json({ error: 'Không tìm thấy ghi chú.' });
 
     res.json(serializeNote(note));
@@ -85,7 +88,10 @@ export async function deleteNote(req, res, next) {
       return res.status(404).json({ error: 'Không tìm thấy ghi chú.' });
     }
 
-    const note = await Note.findByIdAndDelete(req.params.id);
+    const note = await Note.findOneAndDelete({
+      _id: req.params.id,
+      ownerId: req.user.id,
+    });
     if (!note) return res.status(404).json({ error: 'Không tìm thấy ghi chú.' });
 
     res.status(204).end();

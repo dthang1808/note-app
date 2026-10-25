@@ -90,6 +90,37 @@ h1 { margin: 0; color: #272d33; font: 700 37px 'Manrope', sans-serif; letter-spa
 .not-found h1 { margin-top: 10px; font-size: 30px; }
 .not-found p { color: var(--muted); font-size: 13px; }
 .not-found a { margin-top: 12px; color: var(--green); font-size: 13px; font-weight: 600; text-decoration: none; }
+.account-menu { display: flex; align-items: center; gap: 10px; }
+.account-username { color: #727b81; font-size: 12px; }
+.logout-button { padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: #747c85; cursor: pointer; font-size: 11px; }
+.logout-button:hover { border-color: #d7e1d9; color: var(--green); }
+.auth-loading, .auth-page { display: grid; min-height: 100vh; place-items: center; padding: 24px; }
+.auth-loading { align-content: center; gap: 4px; color: var(--muted); font-size: 13px; }
+.auth-card { width: min(420px, 100%); padding: 36px; border: 1px solid #e9ecef; border-radius: 12px; background: #fff; box-shadow: 0 14px 45px rgba(36, 48, 39, .045); }
+.auth-brand { margin-bottom: 44px; }
+.auth-card .eyebrow { margin-bottom: 10px; }
+.auth-card h1 { font-size: 31px; }
+.auth-subtitle { margin: 9px 0 26px; color: #9299a3; font-size: 13px; line-height: 1.6; }
+.auth-form { display: grid; gap: 9px; }
+.auth-form label { margin-top: 7px; color: #596168; font-size: 12px; font-weight: 600; }
+.auth-form input { width: 100%; height: 42px; padding: 0 12px; border: 1px solid #e5e9eb; border-radius: 6px; outline: 0; color: var(--ink); font-size: 12px; }
+.auth-form input:focus { border-color: #91a794; box-shadow: 0 0 0 3px rgba(71, 108, 88, .09); }
+.auth-form input::placeholder { color: #b3b9bd; }
+.auth-hint { margin: 2px 0 3px; color: #9299a3; font-size: 11px; line-height: 1.6; }
+.auth-error { margin: 5px 0 0; }
+.auth-submit { width: 100%; min-height: 43px; margin-top: 10px; }
+.auth-submit:disabled { cursor: wait; opacity: .65; }
+.auth-switch { margin: 22px 0 0; color: #8d959b; text-align: center; font-size: 12px; }
+.auth-switch button { margin-left: 5px; padding: 0; border: 0; background: transparent; color: #4e7057; cursor: pointer; font-size: 12px; font-weight: 600; }
+.auth-switch button:hover { text-decoration: underline; }
+
+@media (max-width: 700px) {
+  .account-menu { gap: 7px; }
+  .account-username { display: none; }
+  .logout-button { padding: 6px 8px; font-size: 10px; }
+  .auth-card { padding: 27px 22px; }
+  .auth-brand { margin-bottom: 34px; }
+}
 
 @media (max-width: 1100px) {
   .sidebar { width: 220px; }

@@ -4,7 +4,7 @@ import NoteCard from '../components/NoteCard.jsx';
 import NoteEditor from '../components/NoteEditor.jsx';
 import { notesApi } from '../services/api.js';
 
-export default function Home() {
+export default function Home({ user, onLogout, authError }) {
   const [notes, setNotes] = useState([]);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
@@ -97,9 +97,14 @@ export default function Home() {
       <main className="main">
         <header className="topbar">
           <div className="breadcrumb">Không gian của bạn <span>/</span> Ghi chú</div>
-          <div className="topbar__avatar" aria-label="Tài khoản của bạn">M</div>
+          <div className="account-menu">
+            <div className="topbar__avatar" aria-hidden="true">{user.username.slice(0, 1).toUpperCase()}</div>
+            <span className="account-username">{user.username}</span>
+            <button className="logout-button" type="button" onClick={onLogout}>Đăng xuất</button>
+          </div>
         </header>
         <section className="content">
+          {authError && <div className="error-banner" role="alert">{authError}</div>}
           <div className="page-heading">
             <div>
               <div className="eyebrow">THỨ CỦA BẠN, THEO CÁCH CỦA BẠN</div>
