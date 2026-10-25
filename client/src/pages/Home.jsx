@@ -1,115 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
+import Icon from '../components/Icon.jsx';
+import NoteCard from '../components/NoteCard.jsx';
+import NoteEditor from '../components/NoteEditor.jsx';
+import { notesApi } from '../services/api.js';
 
-const icons = {
-  notes: <><rect x="4" y="3" width="16" height="18" rx="3" /><path d="M8 8h8M8 12h8M8 16h5" /></>,
-  search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></>,
-  plus: <path d="M12 5v14M5 12h14" />,
-  pin: <><path d="m16 3 5 5-4 1-4 4-1 5-2-2-2 5-1-1 2-5-2-2 5-1 4-4z" /></>,
-  grid: <><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></>,
-  trash: <><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6" /></>,
-  close: <path d="m18 6-12 12M6 6l12 12" />,
-  arrow: <><path d="M7 17 17 7M7 7h10v10" /></>,
-};
-
-function Icon({ name, size = 18 }) {
-  return (
-    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-      {icons[name]}
-    </svg>
-  );
-}
-
-function formatDate(date) {
-  return new Intl.DateTimeFormat('vi-VN', { day: 'numeric', month: 'short' }).format(new Date(date));
-}
-
-function NoteCard({ note, onOpen, onDelete }) {
-  return (
-    <article className={`note-card${note.pinned ? ' note-card--pinned' : ''}`} onClick={() => onOpen(note)}>
-      <div className="note-card__top">
-        <span className="note-date">{formatDate(note.updatedAt)}</span>
-        {note.pinned && <span className="pin-mark" aria-label="Đã ghim"><Icon name="pin" size={15} /></span>}
-      </div>
-      <h3>{note.title}</h3>
-      <p>{note.content || 'Chưa có nội dung.'}</p>
-      <div className="note-card__footer">
-        <span>{note.content ? `${note.content.length} ký tự` : 'Ghi chú trống'}</span>
-        <button
-          className="icon-button delete-button"
-          type="button"
-          aria-label={`Xóa ${note.title}`}
-          title="Xóa ghi chú"
-          onClick={(event) => {
-            event.stopPropagation();
-            onDelete(note);
-          }}
-        >
-          <Icon name="trash" size={16} />
-        </button>
-      </div>
-    </article>
-  );
-}
-
-function Editor({ note, onClose, onSave }) {
-  const [title, setTitle] = useState(note?.title ?? '');
-  const [content, setContent] = useState(note?.content ?? '');
-  const [pinned, setPinned] = useState(note?.pinned ?? false);
-  const [saving, setSaving] = useState(false);
-
-  async function submit(event) {
-    event.preventDefault();
-    setSaving(true);
-    try {
-      await onSave({ title, content, pinned });
-      onClose();
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <form className="editor" onSubmit={submit}>
-        <div className="editor__toolbar">
-          <span>{note ? 'CHỈNH SỬA GHI CHÚ' : 'GHI CHÚ MỚI'}</span>
-          <div className="editor__actions">
-            <button className={`icon-button pin-toggle${pinned ? ' is-active' : ''}`} type="button" title={pinned ? 'Bỏ ghim' : 'Ghim ghi chú'} aria-label="Ghim ghi chú" onClick={() => setPinned(!pinned)}>
-              <Icon name="pin" />
-            </button>
-            <button className="icon-button" type="button" aria-label="Đóng" onClick={onClose}><Icon name="close" /></button>
-          </div>
-        </div>
-        <input
-          className="editor__title"
-          autoFocus
-          maxLength={120}
-          placeholder="Tiêu đề"
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          aria-label="Tiêu đề ghi chú"
-        />
-        <textarea
-          className="editor__content"
-          maxLength={20000}
-          placeholder="Bắt đầu viết điều bạn đang nghĩ..."
-          value={content}
-          onChange={(event) => setContent(event.target.value)}
-          aria-label="Nội dung ghi chú"
-        />
-        <div className="editor__footer">
-          <span>{content.length.toLocaleString('vi-VN')} / 20.000 ký tự</span>
-          <button className="save-button" type="submit" disabled={saving || (!title.trim() && !content.trim())}>
-            {saving ? 'Đang lưu...' : 'Lưu ghi chú'}
-            <Icon name="arrow" size={16} />
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
-export default function App() {
+export default function Home() {
   const [notes, setNotes] = useState([]);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
@@ -118,18 +13,9 @@ export default function App() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
-  async function request(url, options) {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-      const result = await response.json().catch(() => ({}));
-      throw new Error(result.error || 'Không thể kết nối với máy chủ.');
-    }
-    return response.status === 204 ? null : response.json();
-  }
-
   async function loadNotes() {
     try {
-      setNotes(await request('/api/notes'));
+      setNotes(await notesApi.getAll());
       setError('');
     } catch (err) {
       setError(err.message);
@@ -151,29 +37,19 @@ export default function App() {
   }, [notes, query, filter]);
 
   async function saveNote(values) {
-    try {
-      const savedNote = await request(
-        editorNote ? `/api/notes/${editorNote.id}` : '/api/notes',
-        {
-          method: editorNote ? 'PUT' : 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(values),
-        },
-      );
-      setNotes((current) => editorNote
-        ? current.map((note) => note.id === savedNote.id ? savedNote : note)
-        : [savedNote, ...current]);
-      setError('');
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    }
+    const savedNote = editorNote
+      ? await notesApi.update(editorNote.id, values)
+      : await notesApi.create(values);
+    setNotes((current) => editorNote
+      ? current.map((note) => note.id === savedNote.id ? savedNote : note)
+      : [savedNote, ...current]);
+    setError('');
   }
 
   async function deleteNote(note) {
     if (!window.confirm(`Xóa ghi chú "${note.title}"?`)) return;
     try {
-      await request(`/api/notes/${note.id}`, { method: 'DELETE' });
+      await notesApi.remove(note.id);
       setNotes((current) => current.filter((item) => item.id !== note.id));
       setError('');
     } catch (err) {
@@ -264,7 +140,7 @@ export default function App() {
         </section>
       </main>
 
-      {editorOpen && <Editor key={editorNote?.id ?? 'new'} note={editorNote} onClose={closeEditor} onSave={saveNote} />}
+      {editorOpen && <NoteEditor key={editorNote?.id ?? 'new'} note={editorNote} onClose={closeEditor} onSave={saveNote} />}
     </div>
   );
 }

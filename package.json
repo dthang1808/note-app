@@ -2,23 +2,18 @@
   "name": "note-app",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "scripts": {
     "dev": "concurrently -k \"npm:server\" \"npm:client\"",
-    "server": "node --watch server/index.js",
-    "client": "vite",
-    "build": "vite build",
-    "start": "node server/index.js"
-  },
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.21.2",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "server": "npm run dev --workspace=server",
+    "client": "npm run dev --workspace=client",
+    "build": "npm run build --workspace=client",
+    "start": "npm start --workspace=server"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.4",
-    "concurrently": "^9.1.2",
-    "vite": "^6.0.5"
+    "concurrently": "^9.1.2"
   }
 }
